@@ -1,8 +1,10 @@
 import User from "../models/user.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+
 const JWT_SECRET = process.env.JWT_SECRET || "devsecret";
 
+/** POST /register */
 export const register = async (req, res) => {
   try {
     const { name, email, password } = req.body || {};
@@ -16,6 +18,7 @@ export const register = async (req, res) => {
   } catch (e) { return res.status(500).json({ error: e.message }); }
 };
 
+/** POST /login */
 export const login = async (req, res) => {
   try {
     const { email, password } = req.body || {};
@@ -28,6 +31,7 @@ export const login = async (req, res) => {
   } catch (e) { return res.status(500).json({ error: e.message }); }
 };
 
+/** GET /me (needs auth) */
 export const me = async (_req, res) => {
   try {
     const user = await User.findById(res.locals.user.id).select("-password");

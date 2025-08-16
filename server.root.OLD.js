@@ -2,35 +2,27 @@ import express from "express";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 import cors from "cors";
-import path from "path";
-import { fileURLToPath } from "url";
 
-import authRoutes from "./routes/authRoutes.js";
 import offenseRoutes from "./routes/offenseRoutes.js";
-import cameraRoutes from "./routes/cameraRoutes.js";
-import vehicleRoutes from "./routes/vehicleRoutes.js";
-import finesRoutes from "./routes/finesRoutes.js";
+import authRoutes from "./routes/authRoutes.js";
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-dotenv.config({ path: path.join(__dirname, ".env") });
+dotenv.config();
 mongoose.set("strictQuery", false);
 
 const app = express();
-app.use(cors());               // dev: allow all origins
+app.use(cors({ origin: process.env.CLIENT_URL || "*" }));
 app.use(express.json());
 
-// Health
+// health check
 app.get("/health", (_req, res) => res.json({ ok: true }));
 
-// Routes
+// API routes
 app.use("/api/auth", authRoutes);
 app.use("/api/offenses", offenseRoutes);
-app.use("/api/cameras", cameraRoutes);
-app.use("/api/vehicles", vehicleRoutes);
-app.use("/api/fines", finesRoutes);
 
-const PORT = Number(process.env.PORT) || 4007;
+const PORT = Number(process.env.PORT) || 4000;
 const MONGO_URI = process.env.MONGO_URI;
+
 if (!MONGO_URI) {
   console.error("❌ Missing MONGO_URI in backend/.env");
   process.exit(1);
@@ -39,7 +31,7 @@ if (!MONGO_URI) {
 mongoose.connect(MONGO_URI, { serverSelectionTimeoutMS: 20000 })
   .then(() => {
     console.log("✅ Mongo connected");
-    app.listen(PORT, "0.0.0.0", () => console.log(`🚀 Server on ${PORT}`));
+    app.listen(PORT, () => console.log(`🚀 Server on ${PORT}`));
   })
   .catch(err => {
     console.error("❌ Startup error:", err.message);
